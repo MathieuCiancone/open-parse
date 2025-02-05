@@ -70,7 +70,7 @@ class BasicIngestionPipeline(IngestionPipeline):
     def __init__(self):
         self.transformations = [
             RemoveTextInsideTables(),
-            CombineSlicedImages(),
+            # CombineSlicedImages(),
             RemoveFullPageStubs(max_area_pct=0.35),
             # mostly aimed at combining bullets and weird formatting
             CombineNodesSpatially(
