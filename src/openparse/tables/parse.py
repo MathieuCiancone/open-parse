@@ -183,35 +183,38 @@ def _ingest_with_unitable(
     for page_num, table_bboxes in pages_with_tables.items():
         page = pdoc[page_num]
         for table_bbox in table_bboxes:
-            padding_pct = 0.05
-            padded_bbox = adjust_bbox_with_padding(
-                bbox=table_bbox.bbox,
-                page_width=page.rect.width,
-                page_height=page.rect.height,
-                padding_pct=padding_pct,
-            )
-            table_img = crop_img_with_padding(pdf_as_imgs[page_num], padded_bbox)
-
-            table_str = table_img_to_html(table_img)
-
-            # Flip y-coordinates to match the top-left origin system
-            fy0 = page.rect.height - padded_bbox[3]
-            fy1 = page.rect.height - padded_bbox[1]
-
-            table_elem = TableElement(
-                bbox=Bbox(
-                    page=page_num,
-                    x0=padded_bbox[0],
-                    y0=fy0,
-                    x1=padded_bbox[2],
-                    y1=fy1,
+            try:
+                padding_pct = 0.05
+                padded_bbox = adjust_bbox_with_padding(
+                    bbox=table_bbox.bbox,
                     page_width=page.rect.width,
                     page_height=page.rect.height,
-                ),
-                text=table_str,
-            )
-
-            tables.append(table_elem)
+                    padding_pct=padding_pct,
+                )
+                table_img = crop_img_with_padding(pdf_as_imgs[page_num], padded_bbox)
+    
+                table_str = table_img_to_html(table_img)
+    
+                # Flip y-coordinates to match the top-left origin system
+                fy0 = page.rect.height - padded_bbox[3]
+                fy1 = page.rect.height - padded_bbox[1]
+    
+                table_elem = TableElement(
+                    bbox=Bbox(
+                        page=page_num,
+                        x0=padded_bbox[0],
+                        y0=fy0,
+                        x1=padded_bbox[2],
+                        y1=fy1,
+                        page_width=page.rect.width,
+                        page_height=page.rect.height,
+                    ),
+                    text=table_str,
+                )
+    
+                tables.append(table_elem)
+            except:
+                print(f"Error with table parsing on page {page_num}")
 
     return tables
 
